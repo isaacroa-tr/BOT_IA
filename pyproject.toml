@@ -2,7 +2,7 @@
 name = "trading-ai"
 version = "0.1.0"
 description = "Bot SMC/oferta-demanda con filtrado humano + IA para el criterio discrecional"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "pandas>=2.2",
     "numpy>=1.26",
