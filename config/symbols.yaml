@@ -1,0 +1,6 @@
+# Símbolos que opera la estrategia (nombres deben coincidir con el broker MT5)
+symbols:
+  - EURUSD
+  - GBPUSD
+  - US30
+  - NAS100

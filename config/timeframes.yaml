@@ -1,0 +1,18 @@
+# Temporalidades disponibles para el análisis top-down contextual.
+# El uso real que se les da (qué combinación de HTF/MTF/LTF por trade) no sigue
+# una jerarquía fija — ver docs/rule_decisions.md, sección "multi-timeframe".
+timeframes:
+  - "1D"
+  - "4H"
+  - "1H"
+  - "M30"
+  - "M15"
+  - "M5"
+  - "M1"
+
+# Jerarquías plausibles usadas por el generador de candidatos (Fase 3) como
+# simplificación deliberada del criterio contextual real del usuario.
+candidate_hierarchies:
+  - [ "1D", "4H", "M15" ]
+  - [ "4H", "1H", "M5" ]
+  - [ "1H", "M30", "M1" ]

@@ -1,0 +1,50 @@
+# Todo parámetro ajustable de la estrategia vive aquí — nunca hardcodeado en el código.
+# Este archivo se va poblando durante la Fase 0 (especificación iterativa de reglas).
+# Estado de cada bloque documentado en paralelo en docs/rule_decisions.md.
+
+swings:
+  # FORMALIZADO: pendiente de definir lookback exacto en la Fase 0 (notebook 01).
+  lookback_bars: null
+
+bos_choch:
+  major:
+    status: pendiente
+  internal:
+    status: pendiente # BOS/CHOCH internos — concepto a tratar aparte, ver docs/rule_decisions.md
+
+order_blocks:
+  status: pendiente
+  requires_bos_choch: true
+  requires_fvg: true # imbalance = FVG clásico de 3 velas (confirmado, ver rule_decisions.md)
+
+fvg:
+  status: formalizado
+  definition: "gap clásico de 3 velas (fair value gap estándar)"
+
+freshness:
+  status: pendiente
+  # Pregunta abierta: ¿un toque de mecha invalida la zona, o solo un cierre dentro de ella?
+  invalidation_rule: null
+
+transfer:
+  status: pendiente
+  # "Transferencia": al romper una zona/OB, o un high/low con un OB sin mitigar dibujado,
+  # la relevancia se transfiere a otra zona cercana. Concepto propio del usuario, sin
+  # equivalente estándar en librerías SMC — ver docs/rule_decisions.md.
+
+entry_confirmation:
+  status: pendiente
+  # No es un checklist AND fijo: choch_ltf, candle_pattern y liquidity_sweep son señales
+  # independientes que pueden o no estar presentes.
+  signals: [ "choch_ltf", "candle_pattern", "liquidity_sweep" ]
+  htf_extension_ratio:
+    status: pendiente
+    # A MENOR extensión del movimiento HTF (vs. ATR), mayor probabilidad de entrar sin
+    # confirmación. Umbral concreto pendiente de definir con ejemplos reales.
+    threshold: null
+
+exit_rule:
+  status: pendiente
+  # SL/TP: no definido todavía — cerrar antes de Fase 3/4.
+  stop_loss: null
+  take_profit: null

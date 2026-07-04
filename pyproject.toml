@@ -1,0 +1,27 @@
+[project]
+name = "trading-ai"
+version = "0.1.0"
+description = "Bot SMC/oferta-demanda con filtrado humano + IA para el criterio discrecional"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "pyarrow>=16.0",
+    "mplfinance>=0.12.10b0",
+    "matplotlib>=3.8",
+    "MetaTrader5>=5.0.45",
+    "smartmoneyconcepts>=0.0.24",
+    "PyYAML>=6.0",
+    "pydantic>=2.7",
+    "jupyter>=1.0",
+    "xgboost>=2.0",
+    "scikit-learn>=1.4",
+    "shap>=0.45",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
