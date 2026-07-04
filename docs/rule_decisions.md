@@ -14,6 +14,33 @@ Un registro por concepto de la estrategia. Cada concepto queda en uno de tres es
 
 El usuario confirmó que el uso de temporalidades (1D→M1) es contextual, sin jerarquía fija — depende de dónde se ve mejor la estructura/zona ese día. Para v1 (Fase 3) se usa un conjunto de jerarquías plausibles configurables en `config/timeframes.yaml` (`candidate_hierarchies`), documentado explícitamente como simplificación deliberada. El criterio real de selección de temporalidad es candidato a ser parte de lo que el modelo de IA capture (Fase 7), no una regla determinista.
 
+## Swings / legs / estructura de mercado
+
+**Estado: EN ITERACIÓN ACTIVA (no cerrado) — ver `docs/PROJECT_STATE.md` para el estado sesión a sesión**
+
+Historial resumido (detalle completo en PROJECT_STATE.md y en los commits de la rama `fase0-swings`):
+1. Ventana fija de N velas → rechazada, marcaba ruido sin respetar HH/HL ni LH/LL.
+2. Confirmación por reversión de ATR → rechazada, umbral arbitrario que se comía swings válidos.
+3. Pivots locales fusionados hasta alternar (sin umbral) → pedido explícito del usuario, funciona
+   bien para ventanas cortas pero es muy denso sobre todo el histórico.
+4. Confirmación por ruptura recursiva (romper el swing del mismo tipo anterior) → pedido también
+   por el usuario, pero **descartada tras pruebas extensas**: colapsa la estructura a muy pocos
+   puntos sin importar la ventana de tiempo usada. No volver a intentar esta variante tal cual.
+5. Bug real encontrado y corregido: una vela puede ser pivot high y low a la vez (rango amplio);
+   el código con `if/elif` perdía uno de los dos silenciosamente. Corregido en
+   `detect_structural_swings_list()` (`src/trading_ai/structure/swings.py`).
+6. Con el bug corregido, el detector simple (pivots + fusión, sin ruptura) aplicado sobre velas
+   4H reproduce los 6 puntos que el usuario marcó a mano como referencia, pero también genera
+   ~8 puntos "extra" no marcados. El usuario indicó que descarta esos extras por dos razones:
+   (a) algunos son simplemente muy pequeños, y (b) hay una regla adicional que notó tener pero
+   **todavía no ha explicado** — pendiente para la próxima sesión, preguntar directamente antes
+   de seguir probando variantes de código a ciegas.
+
+Imágenes de referencia en `docs/reference_images/`:
+- `Ejemplo de estructura de mercado alcista en una temporalidad arbitraria.jpg` (diagrama HH/HL genérico).
+- `Como yo habría marcado las ultimas 4 legs en EURUSD.png` (1H, con anotaciones de OB/transferencia).
+- `Como yo habría marcado las ultimas 4 legs en EURUSD en 4H.png` (la misma referencia en 4H).
+
 ## FVG / Imbalance
 
 **Estado: FORMALIZADO**
