@@ -110,7 +110,14 @@ def detect_transferencias(
         candle1 = df.iloc[retro_ob["boundary_pos"]]
         candle1_low, candle1_high = candle1["low"], candle1["high"]
 
-        inner = [(pos, typ, p) for pos, typ, p in raw_swings if o_pos < pos < e_pos]
+        # <= e_pos (no < e_pos): una vela de rango amplio puede ser a la vez
+        # el pivot de retroceso (transferencia) Y, con su otro extremo, la
+        # misma vela que confirma la ruptura de L -- si cortáramos en
+        # e_pos exclusivo, ese retroceso quedaría fuera de la búsqueda
+        # aunque el toque (el pivot anterior) sí calificara, y encima el
+        # toque terminaría siendo el último elemento de la lista, que el
+        # loop de abajo nunca evalúa como toque (necesita un "siguiente").
+        inner = [(pos, typ, p) for pos, typ, p in raw_swings if o_pos < pos <= e_pos]
         for j in range(len(inner) - 1):
             pos, typ, p = inner[j]
             if typ == trend and candle1_low <= p <= candle1_high:

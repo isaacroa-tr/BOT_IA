@@ -64,6 +64,19 @@ def _raw_pivots(df: pd.DataFrame) -> list[tuple[int, int]]:
     de rango amplio); en ese caso se emiten ambos eventos, ordenados según la
     dirección de la vela (alcista -> low antes que high; bajista -> al revés),
     ya que solo hay OHLC, no datos de tick.
+
+    Corrección 2026-07-12: la comparación es tolerante a empates del lado
+    IZQUIERDO (>=/<=) y estricta del lado DERECHO (>/<). Con las dos
+    comparaciones estrictas, una meseta (dos velas consecutivas con el mismo
+    high, o el mismo low) no generaba pivot en NINGUNA de las dos velas --
+    cada una perdía contra la otra por no ser "estrictamente" mayor/menor.
+    Eso podía borrar el único pivot que separaba dos rachas de velas del
+    mismo tipo mucho más adelante (ver docs/rule_decisions.md, caso real
+    EURUSD 1H 2026-07-02 11:00/12:00), haciendo que un low posterior
+    genuino se comparara -- y perdiera -- contra un low mucho más viejo y
+    profundo, en vez de quedar registrado como su propio swing. Con la
+    meseta resuelta a favor de la ÚLTIMA vela (el toque final antes de que
+    el precio revierta), ese low posterior ya no compite contra el viejo.
     """
     highs = df["high"].to_numpy()
     lows = df["low"].to_numpy()
@@ -73,8 +86,8 @@ def _raw_pivots(df: pd.DataFrame) -> list[tuple[int, int]]:
 
     pivots: list[tuple[int, int]] = []
     for i in range(1, n - 1):
-        is_high = highs[i] > highs[i - 1] and highs[i] > highs[i + 1]
-        is_low = lows[i] < lows[i - 1] and lows[i] < lows[i + 1]
+        is_high = highs[i] >= highs[i - 1] and highs[i] > highs[i + 1]
+        is_low = lows[i] <= lows[i - 1] and lows[i] < lows[i + 1]
         if is_high and is_low:
             if closes[i] >= opens[i]:
                 pivots.append((i, -1))
