@@ -60,23 +60,45 @@ mismo criterio a "muchos tipos" que el usuario mencionó sin detallar.
 
 ## Transferencia
 
-**Estado: criterio FORMALIZADO (2026-07-04)**
+**Estado: criterio FORMALIZADO (2026-07-12, reprecisado respecto a la versión del 2026-07-04)**
 
 Concepto propio del usuario, sin equivalente estándar en librerías SMC. Ejemplo de referencia:
-`piernas_a_mi_estilo.jpg` (aunque el usuario aclaró que ESE dibujo en particular no alcanza a
-mostrar el caso -- la secuencia real es esta:
+`ejemplo_transferencia.jpg` (el dibujo `piernas_a_mi_estilo.jpg` no alcanzaba a mostrar el caso
+con precisión).
 
-1. Una pierna nueva (ej. pierna 3, alcista) arranca en su origen (low3) y empieza a subir.
-2. El precio **toca** el OB de la pierna previa opuesta (ej. OB-B, el OB bajista del retroceso
-   high2→low3 que precedió a esta pierna 3) -- pero todavía no lo rompe.
-3. El precio **retrocede** desde ahí, dejando un mínimo (o máximo, simétrico en bajista) interno
-   nuevo -- **ese punto de retroceso es la "transferencia"**.
-4. El precio vuelve a subir (o bajar) y esta vez **rompe todo, incluido el OB de la pierna
-   previa (OB-B)**, validando un nuevo fractal/swing.
+Definición exacta (reemplaza la versión de 2026-07-04, que usaba la zona completa del OB como
+nivel de toque -- ver historial de git de este archivo para la versión vieja):
+
+1. `retro_leg` = el retroceso previo al origen de la pierna nueva L. Si la pierna anterior
+   (`prev_leg`) es de tendencia OPUESTA a L (**CHoCH**), `retro_leg` = `prev_leg` directamente. Si
+   `prev_leg` es de la MISMA tendencia que L (**BOS**), el retroceso previo nunca validó como
+   pierna propia -- se reconstruye como una pseudo-pierna opuesta desde el fin de `prev_leg` hasta
+   el origen de L (el origen real de L casi nunca coincide con el fin exacto de `prev_leg` --
+   `swings.py` puede profundizar el origen muchas velas después sin que quede registrado como
+   pierna propia; la pseudo-pierna se reconstruye igual, sin importar el tamaño de ese hueco --
+   bug corregido 2026-07-12, la versión anterior exigía coincidencia exacta y dejaba el conteo de
+   transferencias BOS en cero en toda la historia).
+2. Se calcula el Order Block de `retro_leg` con la función ya existente `detect_order_block()`
+   (sin cambios respecto a la definición de OB ya formalizada). La vela límite de ese OB (el
+   borde del primer FVG de `retro_leg`, contando desde SU origen) es "vela 1".
+3. Mientras se forma L, tiene que aparecer un **pivot genuino** (un extremo local real de la
+   secuencia de swings, no cualquier mecha de paso) del tipo a favor de la tendencia de L, cuyo
+   precio caiga **dentro del rango propio de vela 1** (entre su low y su high) -- no en toda la
+   zona del OB de `retro_leg`, solo en el rango de esa vela puntual. Cualquier mecha posterior que
+   supere ese rango (por fuera de vela 1, en la dirección de continuación) invalida el toque --
+   más estricto que la regla de cierre M5 usada en el resto del criterio (acá ninguna mecha puede
+   pasarse, no solo el cierre).
+4. El siguiente pivot (en contra de la tendencia de L) inmediatamente después de ese toque es la
+   **transferencia**.
+5. A ese pivot se le calcula su propio Order Block con la misma `detect_order_block()`, tratando
+   el tramo toque→transferencia como una pierna nueva (tendencia opuesta a L, mismo signo que
+   `retro_leg`). Esa zona es la que se dibuja como "Transferencia" en `ejemplo_transferencia.jpg`.
+6. Después el precio rompe estructura de verdad desde ese pivot, validando L (la ruptura en sí ya
+   está cubierta por la lógica de piernas existente en `swings.py`, sin cambios).
 
 La relevancia (la zona a la que hay que prestarle atención si el precio retrocede después) pasa
-de OB-B a este punto de transferencia, una vez que OB-B queda roto/invalidado por el impulso del
-paso 4.
+de OB-B (el OB de `retro_leg`) a este punto de transferencia, una vez que OB-B queda
+roto/invalidado por el impulso del paso 6.
 
 **Transferencias encadenadas**: confirmado por el usuario que sí puede pasar -- el mismo patrón
 se puede repetir sobre T1 (se toca, retrocede, rompe) generando T2, y así sucesivamente. Pero el
